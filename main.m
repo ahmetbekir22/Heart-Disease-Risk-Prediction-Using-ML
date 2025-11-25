@@ -1,3 +1,4 @@
+
 clear; clc; close all;
 
 addpath('src');
@@ -16,9 +17,16 @@ save models.mat models;
 % Visualizations
 visualizeResults(models.Ensemble, X, Y);
 
+featureNames = {
+    'male', 'age', 'currentSmoker', 'cigsPerDay', 
+    'BPMeds', 'prevalentStroke', 'prevalentHyp', 'diabetes',
+    'totChol', 'sysBP', 'diaBP', 'BMI', 'heartRate', 'glucose'
+};
 % Model Comparison
 results = compareModels(X, Y);
 
+cvConfusionResults(results, Y);
+futureImportance(results, featureNames);
 % PCA Visualization
 pcaVisualization(X, Y);
 

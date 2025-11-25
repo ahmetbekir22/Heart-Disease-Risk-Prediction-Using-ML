@@ -1,59 +1,33 @@
-% function [X, Y, data] = loadData()
-% 
-%     data = readtable('data/framingham.csv');
-% 
-%     % Target (num kolonu)
-%     Y = data.num;
-% 
-%     % num kolonunu çıkar, sadece özellikleri al
-%     data.num = [];
-% 
-%     % Kategorik kolonları otomatik dönüştür
-%     catCols = varfun(@iscellstr, data, 'OutputFormat', 'uniform') | ...
-%               varfun(@islogical, data, 'OutputFormat', 'uniform');
-% 
-%     for i = 1:width(data)
-%         if catCols(i)
-%             data.(i) = categorical(data.(i));
-%         end
-%     end
-% 
-%     X = data;
-% 
-% end
-
 
 function [X, Y, data] = loadData()
 
     % Veri setini oku
     data = readtable('data/framingham.csv');
 
-    % Eksik verileri temizle
-    data = rmmissing(data);
-
-    % Target (TenYearCHD)
+    % Target (CHD)
     Y = data.TenYearCHD;
 
     % Target kolonunu çıkar
     data.TenYearCHD = [];
-    % Remove 'education' if present
+
+    % education kolonunu kaldır (çok eksik)
     if ismember('education', data.Properties.VariableNames)
         data.education = [];
     end
 
+    % ---- MEDIAN IMPUTATION ----
+    % Hangi kolonlar numeric?
+    numVars = varfun(@isnumeric, data, 'OutputFormat','uniform');
 
-    % Kategorik kolonları tespit et (Framingham çoğunlukla numeric)
-    catCols = varfun(@iscellstr, data, 'OutputFormat','uniform') | ...
-              varfun(@islogical, data, 'OutputFormat','uniform');
-
-    % Kategorikleri dönüştür
     for i = 1:width(data)
-        if catCols(i)
-            data.(i) = categorical(data.(i));
+        if numVars(i)
+            col = data.(i);
+            med = median(col, 'omitnan');  % kolon medyanını hesapla
+            col(ismissing(col)) = med;     % missing değerleri median ile doldur
+            data.(i) = col;
         end
     end
 
-    % Özellik matrisi
     X = data;
 
 end

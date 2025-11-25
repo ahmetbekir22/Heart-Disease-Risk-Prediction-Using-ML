@@ -36,6 +36,23 @@ function visualizeResults(model, X, Y)
     heatmap(corrMatrix, ...
         'Colormap', parula, ...
         'Title', 'Correlation Matrix');
+    % ==== 3) Correlation Matrix ====
+    % numericVars = X(:, varfun(@isnumeric, X, 'OutputFormat','uniform'));
+    % corrMatrix = corr(table2array(numericVars), 'rows', 'complete');
+    % 
+    % % X'in değişken isimlerini otomatik al
+    % if istable(numericVars)
+    %     featureNames = numericVars.Properties.VariableNames;
+    % else
+    %     % Manuel isimler (X table değilse)
+    %     featureNames = {'Male', 'Age', 'Smoker', 'Cigs/Day', 'BPMeds', 'Stroke', 'Hypert', 'Diabetes', 'TotChol', 'SysBP', 'DiaBP', 'BMI', 'HeartRate', 'Glucose'};
+    % end
+    % 
+    % figure('Position', [100, 100, 1200, 900]);
+    % h = heatmap(featureNames, featureNames, corrMatrix, ...
+    %     'Colormap', parula, ...
+    %     'Title', 'Correlation Matrix', ...
+    %     'FontSize', 10);
 
     % ==== 4) Feature Importance ====
     try

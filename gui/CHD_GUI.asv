@@ -1,0 +1,533 @@
+% function CHD_GUI
+%     % -------------------------------
+%     % COMPLETE CHD PREDICTION GUI
+%     % -------------------------------
+% 
+%     fig = uifigure('Name','CHD Prediction System','Position',[350 150 700 600]);
+% 
+%     % -------- INPUT FIELDS --------
+%     uilabel(fig,'Text','Age','Position',[20 530 120 20]);
+%     ageField = uieditfield(fig,'numeric','Position',[150 530 120 22]);
+% 
+%     uilabel(fig,'Text','Sex','Position',[20 490 120 20]);
+%     sexDrop = uidropdown(fig,'Items',{'Male','Female'},'Position',[150 490 120 22]);
+% 
+%     uilabel(fig,'Text','Smoker','Position',[20 450 120 20]);
+%     smokerDrop = uidropdown(fig,'Items',{'No','Yes'},'Position',[150 450 120 22]);
+% 
+%     uilabel(fig,'Text','Cigs Per Day','Position',[20 410 120 20]);
+%     cigsField = uieditfield(fig,'numeric','Position',[150 410 120 22]);
+% 
+%     uilabel(fig,'Text','BPMeds','Position',[20 370 120 20]);
+%     bpmDrop = uidropdown(fig,'Items',{'No','Yes'},'Position',[150 370 120 22]);
+% 
+%     uilabel(fig,'Text','Stroke History','Position',[20 330 120 20]);
+%     strokeDrop = uidropdown(fig,'Items',{'No','Yes'},'Position',[150 330 120 22]);
+% 
+%     uilabel(fig,'Text','Hypertension','Position',[20 290 120 20]);
+%     hypDrop = uidropdown(fig,'Items',{'No','Yes'},'Position',[150 290 120 22]);
+% 
+%     uilabel(fig,'Text','Diabetes','Position',[20 250 120 20]);
+%     diabDrop = uidropdown(fig,'Items',{'No','Yes'},'Position',[150 250 120 22]);
+% 
+%     uilabel(fig,'Text','Total Cholesterol','Position',[20 210 120 20]);
+%     cholField = uieditfield(fig,'numeric','Position',[150 210 120 22]);
+% 
+%     uilabel(fig,'Text','Sys BP','Position',[20 170 120 20]);
+%     sysField = uieditfield(fig,'numeric','Position',[150 170 120 22]);
+% 
+%     uilabel(fig,'Text','Dia BP','Position',[20 130 120 20]);
+%     diaField = uieditfield(fig,'numeric','Position',[150 130 120 22]);
+% 
+%     uilabel(fig,'Text','BMI','Position',[20 90 120 20]);
+%     bmiField = uieditfield(fig,'numeric','Position',[150 90 120 22]);
+% 
+%     uilabel(fig,'Text','Heart Rate','Position',[20 50 120 20]);
+%     hrField = uieditfield(fig,'numeric','Position',[150 50 120 22]);
+% 
+%     uilabel(fig,'Text','Glucose','Position',[20 10 120 20]);
+%     glucoseField = uieditfield(fig,'numeric','Position',[150 10 120 22]);
+% 
+%     % -------- RESULTS TABLE --------
+%     uitable(fig,'ColumnName',{'Model','Prediction'},...
+%         'Position',[300 200 360 300],...
+%         'Tag','ResultsTable');
+% 
+%     % -------- RESULT MESSAGE LABEL --------
+%     resultMsg = uilabel(fig,'Text','',...
+%         'FontSize',14,'FontWeight','bold',...
+%         'Position',[300 160 360 30],...
+%         'FontColor',[0 0.6 1]);   % mavi ton
+% 
+%     % -------- PREDICT BUTTON --------
+%     uibutton(fig,'Text','Predict Risk','Position',[300 120 200 35], ...
+%         'ButtonPushedFcn', @(btn,event) onPredict());
+% 
+% 
+%     % -----------------------------------------------------------
+%     % CALLBACK FUNCTION
+%     % -----------------------------------------------------------
+%     % Clear old message
+%     resultMsg.Text = '';
+%     function onPredict()
+% 
+%         % Clear previous message when Predict is pressed
+%         resultMsg.Text = '';
+% 
+%         % Load models (lazy load)
+%         persistent models;
+%         if isempty(models)
+%             s = load("models.mat");
+%             models = s.models;
+%         end
+% 
+% 
+%         % Prepare input table
+%         in = table(...
+%             strcmp(sexDrop.Value,"Male"), ...
+%             ageField.Value, ...
+%             strcmp(smokerDrop.Value,"Yes"), ...
+%             cigsField.Value, ...
+%             strcmp(bpmDrop.Value,"Yes"), ...
+%             strcmp(strokeDrop.Value,"Yes"), ...
+%             strcmp(hypDrop.Value,"Yes"), ...
+%             strcmp(diabDrop.Value,"Yes"), ...
+%             cholField.Value, ...
+%             sysField.Value, ...
+%             diaField.Value, ...
+%             bmiField.Value, ...
+%             hrField.Value, ...
+%             glucoseField.Value, ...
+%             'VariableNames',{ ...
+%                 'male','age','currentSmoker','cigsPerDay','BPMeds',...
+%                 'prevalentStroke','prevalentHyp','diabetes','totChol',...
+%                 'sysBP','diaBP','BMI','heartRate','glucose'} ...
+%         );
+% 
+%         % Predictions
+%         pSVM  = predict(models.SVM, in);
+%         pEn   = predict(models.Ensemble, in);
+%         pNB   = predict(models.NaiveBayes, in);
+%         pTree = predict(models.Tree, in);
+% 
+%         % Results table update (char-based)
+%         results = {
+%             'SVM',          resultText(pSVM);
+%             'Ensemble',     resultText(pEn);
+%             'Naive Bayes',  resultText(pNB);
+%             'Decision Tree',resultText(pTree);
+%         };
+% 
+%         tbl = findobj(fig,'Tag','ResultsTable');
+%         tbl.Data = results;
+% 
+%         % Show success message again
+%         resultMsg.Text = '✓ Results are calculated successfully.';
+%         drawnow;
+% 
+%     % Auto-hide message after 2 seconds
+%         pause(2);
+%         resultMsg.Text = '';
+%     end
+% 
+%     % -------------- Helper Function ----------------
+%     function txt = resultText(val)
+%         if val == 1
+%             txt = 'Risk exist';
+%         else
+%             txt = 'No Risk';
+%         end
+%     end
+% 
+% end
+
+% 
+% function CHD_GUI
+%     fig = uifigure('Name','CHD Prediction System','Position',[350 150 700 600]);
+% 
+%     % INPUTS
+%     uilabel(fig,'Text','Age','Position',[20 530 120 20]);
+%     ageField = uieditfield(fig,'numeric','Position',[150 530 120 22]);
+% 
+%     uilabel(fig,'Text','Sex','Position',[20 490 120 20]);
+%     sexDrop = uidropdown(fig,'Items',{'Male','Female'},'Position',[150 490 120 22]);
+% 
+%     uilabel(fig,'Text','Smoker','Position',[20 450 120 20]);
+%     smokerDrop = uidropdown(fig,'Items',{'No','Yes'},'Position',[150 450 120 22]);
+% 
+%     uilabel(fig,'Text','Cigs Per Day','Position',[20 410 120 20]);
+%     cigsField = uieditfield(fig,'numeric','Position',[150 410 120 22]);
+% 
+%     uilabel(fig,'Text','BPMeds','Position',[20 370 120 20]);
+%     bpmDrop = uidropdown(fig,'Items',{'No','Yes'},'Position',[150 370 120 22]);
+% 
+%     uilabel(fig,'Text','Stroke History','Position',[20 330 120 20]);
+%     strokeDrop = uidropdown(fig,'Items',{'No','Yes'},'Position',[150 330 120 22]);
+% 
+%     uilabel(fig,'Text','Hypertension','Position',[20 290 120 20]);
+%     hypDrop = uidropdown(fig,'Items',{'No','Yes'},'Position',[150 290 120 22]);
+% 
+%     uilabel(fig,'Text','Diabetes','Position',[20 250 120 20]);
+%     diabDrop = uidropdown(fig,'Items',{'No','Yes'},'Position',[150 250 120 22]);
+% 
+%     uilabel(fig,'Text','Total Cholesterol','Position',[20 210 120 20]);
+%     cholField = uieditfield(fig,'numeric','Position',[150 210 120 22]);
+% 
+%     uilabel(fig,'Text','Sys BP','Position',[20 170 120 20]);
+%     sysField = uieditfield(fig,'numeric','Position',[150 170 120 22]);
+% 
+%     uilabel(fig,'Text','Dia BP','Position',[20 130 120 20]);
+%     diaField = uieditfield(fig,'numeric','Position',[150 130 120 22]);
+% 
+%     uilabel(fig,'Text','BMI','Position',[20 90 120 20]);
+%     bmiField = uieditfield(fig,'numeric','Position',[150 90 120 22]);
+% 
+%     uilabel(fig,'Text','Heart Rate','Position',[20 50 120 20]);
+%     hrField = uieditfield(fig,'numeric','Position',[150 50 120 22]);
+% 
+%     uilabel(fig,'Text','Glucose','Position',[20 10 120 20]);
+%     glucoseField = uieditfield(fig,'numeric','Position',[150 10 120 22]);
+% 
+% 
+%     % TABLE
+%     uitable(fig,'ColumnName',{'Model','Prediction'},...
+%         'Position',[300 200 360 300],...
+%         'Tag','ResultsTable');
+% 
+%     % INFO LABEL
+%     resultMsg = uilabel(fig,'Text','',...
+%         'FontSize',14,'FontWeight','bold',...
+%         'Position',[300 160 360 30],...
+%         'FontColor',[0 0.6 1]);
+% 
+% 
+%     % BUTTON
+%     uibutton(fig,'Text','Predict Risk','Position',[300 120 200 35], ...
+%         'ButtonPushedFcn', @(btn,event) onPredict());
+% 
+% 
+%     % PREDICT FUNCTION
+%     function onPredict()
+% 
+%         resultMsg.Text = '';
+% 
+%         % Load all models
+%         persistent models;
+%         if isempty(models)
+%             s = load("models.mat");   % MUST contain models.SVM etc.
+%             models = s.models;
+%         end
+% 
+%         % Input table
+%         in = table( ...
+%             strcmp(sexDrop.Value,"Male"), ...
+%             ageField.Value, ...
+%             strcmp(smokerDrop.Value,"Yes"), ...
+%             cigsField.Value, ...
+%             strcmp(bpmDrop.Value,"Yes"), ...
+%             strcmp(strokeDrop.Value,"Yes"), ...
+%             strcmp(hypDrop.Value,"Yes"), ...
+%             strcmp(diabDrop.Value,"Yes"), ...
+%             cholField.Value, ...
+%             sysField.Value, ...
+%             diaField.Value, ...
+%             bmiField.Value, ...
+%             hrField.Value, ...
+%             glucoseField.Value, ...
+%             'VariableNames',{ ...
+%                 'male','age','currentSmoker','cigsPerDay','BPMeds',...
+%                 'prevalentStroke','prevalentHyp','diabetes','totChol',...
+%                 'sysBP','diaBP','BMI','heartRate','glucose'} ...
+%         );
+% 
+%         % Predictions
+%         pSVM  = predict(models.SVM, in);
+%         pEn   = predict(models.Ensemble, in);
+%         pNB   = predict(models.NaiveBayes, in);
+%         pTree = predict(models.Tree, in);
+% 
+%         % Results for table
+%         results = {
+%             'SVM',           resultText(pSVM);
+%             'Ensemble',      resultText(pEn);
+%             'Naive Bayes',   resultText(pNB);
+%             'Decision Tree', resultText(pTree);
+%         };
+% 
+%         tbl = findobj(fig,'Tag','ResultsTable');
+%         tbl.Data = results;
+% 
+%         % Success message
+%         resultMsg.Text = '✓ Results are calculated successfully.';
+%         drawnow;
+% 
+%         pause(2);
+%         resultMsg.Text = '';
+% 
+%     end
+% 
+%     % RESULT TEXT
+%     function txt = resultText(val)
+%         if val == 1
+%             txt = 'Risk Exist';
+%         else
+%             txt = 'No Risk';
+%         end
+%     end
+% 
+% end
+% 
+% 
+% function CHD_GUI
+% 
+%     %% ===================== GUI WINDOW ============================
+%     fig = uifigure('Name','CHD Prediction System','Position',[350 150 700 600]);
+% 
+% 
+%     %% ===================== INPUT FIELDS ==========================
+%     labels = { ...
+%         'Age','Sex','Smoker','Cigs Per Day','BPMeds','Stroke History',...
+%         'Hypertension','Diabetes','Total Cholesterol','Sys BP','Dia BP',...
+%         'BMI','Heart Rate','Glucose' };
+% 
+%     yPos = [530 490 450 410 370 330 290 250 210 170 130  90  50  10];
+% 
+%     % Sex + Binary dropdown fields
+%     dropdownNames = {'Sex','Smoker','BPMeds','Stroke History','Hypertension','Diabetes'};
+%     dropdownComponents = {};
+% 
+%     % Create components
+%     for i = 1:length(labels)
+%         uilabel(fig,'Text',labels{i},'Position',[20 yPos(i) 140 22]);
+% 
+%         if ismember(labels{i}, dropdownNames)
+%             dd = uidropdown(fig,'Items',{'No','Yes'},'Position',[150 yPos(i) 120 22]);
+% 
+%             if strcmp(labels{i},'Sex')
+%                 dd.Items = {'Male','Female'};
+%             end
+% 
+%             dropdownComponents.(matlab.lang.makeValidName(labels{i})) = dd;
+% 
+%         else
+%             txt = uieditfield(fig,'numeric','Position',[150 yPos(i) 120 22]);
+%             dropdownComponents.(matlab.lang.makeValidName(labels{i})) = txt;
+%         end
+%     end
+% 
+% 
+%     %% ===================== RESULT TABLE ==========================
+%     uitable(fig,'ColumnName',{'Model','Prediction'},...
+%         'Position',[300 200 360 300],...
+%         'Tag','ResultsTable');
+% 
+% 
+%     %% ===================== STATUS MESSAGE ========================
+%     resultMsg = uilabel(fig,'Text','',...
+%         'FontSize',14,'FontWeight','bold',...
+%         'Position',[300 160 360 30],...
+%         'FontColor',[0 0.6 1]);
+% 
+% 
+%     %% ===================== PREDICT BUTTON ========================
+%     uibutton(fig,'Text','Predict Risk','Position',[300 120 200 35], ...
+%         'ButtonPushedFcn', @(btn,event) onPredict());
+% 
+% 
+%     %% ===================== CALLBACK ==============================
+%     function onPredict()
+% 
+%         resultMsg.Text = '';
+% 
+%         % Load best model (CV optimized)
+%         persistent bestModel;
+%         if isempty(bestModel)
+%             dataLoaded = load("models.mat");  
+%             bestModel = dataLoaded.bestModel;
+%         end
+% 
+%         % Prepare input table
+%         in = table( ...
+%             strcmp(dropdownComponents.Sex.Value,"Male"), ...
+%             dropdownComponents.Age.Value, ...
+%             strcmp(dropdownComponents.Smoker.Value,"Yes"), ...
+%             dropdownComponents.CigsPerDay.Value, ...
+%             strcmp(dropdownComponents.BPMeds.Value,"Yes"), ...
+%             strcmp(dropdownComponents.StrokeHistory.Value,"Yes"), ...
+%             strcmp(dropdownComponents.Hypertension.Value,"Yes"), ...
+%             strcmp(dropdownComponents.Diabetes.Value,"Yes"), ...
+%             dropdownComponents.TotalCholesterol.Value, ...
+%             dropdownComponents.SysBP.Value, ...
+%             dropdownComponents.DiaBP.Value, ...
+%             dropdownComponents.BMI.Value, ...
+%             dropdownComponents.HeartRate.Value, ...
+%             dropdownComponents.Glucose.Value, ...
+%             'VariableNames',{ ...
+%                 'male','age','currentSmoker','cigsPerDay','BPMeds',...
+%                 'prevalentStroke','prevalentHyp','diabetes','totChol',...
+%                 'sysBP','diaBP','BMI','heartRate','glucose'} ...
+%         );
+% 
+%         % Predict with best CV-selected model
+%         p = predict(bestModel, in);
+% 
+%         % Populate table with only 1 model (best model)
+%         tbl = findobj(fig,'Tag','ResultsTable');
+%         tbl.Data = {
+%             class(bestModel), resultText(p)
+%         };
+% 
+%         % Show status message
+%         resultMsg.Text = '✓ Results are calculated successfully.';
+%         drawnow;
+%         pause(2);
+%         resultMsg.Text = '';
+% 
+%     end
+% 
+% 
+%     %% ===================== RESULT TEXT ===========================
+%     function txt = resultText(val)
+%         if val == 1
+%             txt = 'Risk Exist';
+%         else
+%             txt = 'No Risk';
+%         end
+%     end
+% 
+% end
+
+
+function CHD_GUI
+
+    %% ===================== GUI WINDOW ============================
+    fig = uifigure('Name','CHD Prediction System','Position',[350 150 700 600]);
+
+
+    %% ===================== INPUT FIELDS ==========================
+    labels = { ...
+        'Age','Sex','Smoker','Cigs Per Day','BPMeds','Stroke History',...
+        'Hypertension','Diabetes','Total Cholesterol','Sys BP','Dia BP',...
+        'BMI','Heart Rate','Glucose' };
+
+    yPos = [530 490 450 410 370 330 290 250 210 170 130  90  50  10];
+
+    dropdownNames = {'Sex','Smoker','BPMeds','Stroke History','Hypertension','Diabetes'};
+    comp = struct();
+
+    for i = 1:length(labels)
+        uilabel(fig,'Text',labels{i},'Position',[20 yPos(i) 140 22]);
+
+        if ismember(labels{i}, dropdownNames)
+            dd = uidropdown(fig,'Items',{'No','Yes'},'Position',[150 yPos(i) 120 22]);
+            if strcmp(labels{i},'Sex')
+                dd.Items = {'Male','Female'};
+            end
+            comp.(matlab.lang.makeValidName(labels{i})) = dd;
+        else
+            txt = uieditfield(fig,'numeric','Position',[150 yPos(i) 120 22]);
+            comp.(matlab.lang.makeValidName(labels{i})) = txt;
+        end
+    end
+
+
+    %% ===================== RESULT TABLE ==========================
+    uitable(fig,'ColumnName',{'Model','Prediction'},...
+        'Position',[300 200 360 300],...
+        'Tag','ResultsTable');
+
+
+    %% ===================== STATUS MESSAGE ========================
+    resultMsg = uilabel(fig,'Text','',...
+        'FontSize',14,'FontWeight','bold',...
+        'Position',[300 160 360 30],...
+        'FontColor',[0 0.6 1]);
+
+
+    %% ===================== PREDICT BUTTON ========================
+    uibutton(fig,'Text','Predict Risk','Position',[300 120 200 35], ...
+        'ButtonPushedFcn', @(btn,event) onPredict());
+
+
+    %% ===================== CALLBACK ==============================
+    function onPredict()
+
+        % resultMsg.Text = '';
+        % 
+        % % Load all models
+        % persistent models modelNames;
+        % if isempty(models)
+        %     s = load("models.mat");   
+        %     models = s.models;          % struct with 4 models
+        %     modelNames = ["SVM","Ensemble","Naive Bayes","Decision Tree"];
+        % end
+
+    resultMsg.Text = '';
+
+    % Load all CV models
+    persistent models modelNames
+    if isempty(models)
+        s = load("models.mat");   % contains cvModels & cvModelNames
+        models = s.cvModels;
+        modelNames = s.cvModelNames;
+    end
+
+        % Prepare input table
+        in = table( ...
+            strcmp(comp.Sex.Value,"Male"), ...
+            comp.Age.Value, ...
+            strcmp(comp.Smoker.Value,"Yes"), ...
+            comp.CigsPerDay.Value, ...
+            strcmp(comp.BPMeds.Value,"Yes"), ...
+            strcmp(comp.StrokeHistory.Value,"Yes"), ...
+            strcmp(comp.Hypertension.Value,"Yes"), ...
+            strcmp(comp.Diabetes.Value,"Yes"), ...
+            comp.TotalCholesterol.Value, ...
+            comp.SysBP.Value, ...
+            comp.DiaBP.Value, ...
+            comp.BMI.Value, ...
+            comp.HeartRate.Value, ...
+            comp.Glucose.Value, ...
+            'VariableNames',{ ...
+                'male','age','currentSmoker','cigsPerDay','BPMeds',...
+                'prevalentStroke','prevalentHyp','diabetes','totChol',...
+                'sysBP','diaBP','BMI','heartRate','glucose'} ...
+        );
+
+        % Predict with each model
+        pSVM  = predict(models.SVM, in);
+        pEn   = predict(models.Ensemble, in);
+        pNB   = predict(models.NaiveBayes, in);
+        pTree = predict(models.Tree, in);
+
+        % Fill table
+        results = {
+            'SVM',          resultText(pSVM);
+            'Ensemble',     resultText(pEn);
+            'Naive Bayes',  resultText(pNB);
+            'Decision Tree',resultText(pTree);
+        };
+
+        tbl = findobj(fig,'Tag','ResultsTable');
+        tbl.Data = results;
+
+        % Success message
+        resultMsg.Text = '✓ Results are calculated successfully.';
+        drawnow;
+
+        pause(2);
+        resultMsg.Text = '';
+
+    end
+
+
+    %% ===================== RESULT TEXT ===========================
+    function txt = resultText(val)
+        if val == 1
+            txt = 'Risk Exist';
+        else
+            txt = 'No Risk';
+        end
+    end
+
+end
